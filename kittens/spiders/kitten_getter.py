@@ -1,8 +1,15 @@
 import scrapy
+import urllib
 
 
 def html_img_tag(img_url):
     return '<img width=\'30%\' height=\'30%\' src=\''+ img_url +'\' > </img><br/> '
+
+def is_image(url):
+    return img_url.endswith('.jpg') or img_url.endswith('.png') 
+
+def get_image_urls(response):
+    return [i.extract() for i in response.xpath('//a/@href') if is_image(i.extract()) ]
 
 #must inherit from scrapy.Spider
 class KittensSpider(scrapy.Spider):
@@ -18,21 +25,21 @@ class KittensSpider(scrapy.Spider):
         ]
         for url in urls:
             # We make a request to each url and call the parse function on the http response.
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield scrapy.Request(url=url, callback=self.make_html)
     
-    def parse(self,response):
+    def make_html(self,response):
         final = '<script>var a = 5;</script>'
-        for i in response.xpath('//a/@href'):
-            img_url = i.extract()
-            if img_url.endswith('.jpg') or img_url.endswith('.png'):
-                final+= html_img_tag(img_url)
-                print (img_url) 
+        image_urls = get_image_urls(response)
+        for img_url in image_urls:
+            final+= html_img_tag(img_url)
+            print (img_url) 
         with open('links.html','a') as links:
             links.write(final)
         links.close()
-        '''print('all is right')
-        nextLink = response.css('span.next-button a::attr(href)')[0].extract()
-        print(nextLink)
-        self.count += 1
-        if self.count<10:
-            yield scrapy.Request(url = nextLink,callback = self.parse)'''
+    
+    def download_pictures(self, response):
+        image_urls = get_image_urls(response)
+        for img_url in image_urls:
+            final+= html_img_tag(img_url)
+            print (img_url) 
+            urllib.urlretrieve("http://www.gunnerkrigg.com//comics/00000001.jpg", "00000001.jpg")
