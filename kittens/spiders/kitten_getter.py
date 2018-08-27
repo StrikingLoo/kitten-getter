@@ -1,11 +1,11 @@
 import scrapy
-import urllib
-
+import unicodedata
+import requests
 
 def html_img_tag(img_url):
     return '<img width=\'30%\' height=\'30%\' src=\''+ img_url +'\' > </img><br/> '
 
-def is_image(url):
+def is_image(img_url):
     return img_url.endswith('.jpg') or img_url.endswith('.png') 
 
 def get_image_urls(response):
@@ -25,7 +25,7 @@ class KittensSpider(scrapy.Spider):
         ]
         for url in urls:
             # We make a request to each url and call the parse function on the http response.
-            yield scrapy.Request(url=url, callback=self.make_html)
+            yield scrapy.Request(url=url, callback=self.download_pictures)
     
     def make_html(self,response):
         final = '<script>var a = 5;</script>'
@@ -39,7 +39,12 @@ class KittensSpider(scrapy.Spider):
     
     def download_pictures(self, response):
         image_urls = get_image_urls(response)
+
         for img_url in image_urls:
-            final+= html_img_tag(img_url)
-            print (img_url) 
-            urllib.urlretrieve("http://www.gunnerkrigg.com//comics/00000001.jpg", "00000001.jpg")
+            self.index+=1
+            print(img_url) 
+            ascii_url = unicodedata.normalize('NFKD', img_url).encode('ascii','ignore')
+            img_data = requests.get(ascii_url).content
+            with open(str(self.index)+".jpg", 'w') as handler:
+                handler.write(img_data)
+
