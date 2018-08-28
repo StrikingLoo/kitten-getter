@@ -1,6 +1,7 @@
 import scrapy
 import unicodedata
 import requests
+import re
 
 def html_img_tag(img_url):
     return '<img width=\'30%\' height=\'30%\' src=\''+ img_url +'\' > </img><br/> '
