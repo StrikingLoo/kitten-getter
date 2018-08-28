@@ -15,7 +15,7 @@ def get_image_urls(response):
 class KittensSpider(scrapy.Spider):
     #can be any string, will be used to call from the console
     name = "kitten_getter"
-    
+
     # This method must be in the spider, 
     # and will be automatically called by the crawl command.
     def start_requests(self):
@@ -26,7 +26,7 @@ class KittensSpider(scrapy.Spider):
         for url in urls:
             # We make a request to each url and call the parse function on the http response.
             yield scrapy.Request(url=url, callback=self.download_pictures)
-    
+
     def make_html(self,response):
         final = '<script>var a = 5;</script>'
         image_urls = get_image_urls(response)
@@ -36,10 +36,9 @@ class KittensSpider(scrapy.Spider):
         with open('links.html','a') as links:
             links.write(final)
         links.close()
-    
+
     def download_pictures(self, response):
         image_urls = get_image_urls(response)
-
         for img_url in image_urls:
             self.index+=1
             print(img_url) 
@@ -47,4 +46,3 @@ class KittensSpider(scrapy.Spider):
             img_data = requests.get(ascii_url).content
             with open(str(self.index)+".jpg", 'w') as handler:
                 handler.write(img_data)
-
